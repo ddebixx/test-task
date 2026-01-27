@@ -1,18 +1,41 @@
+import { useState } from "react"
 import { Skeleton } from "@/components/ui/Skeleton/skeleton"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/card"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar/avatar"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+} from "@/components/ui/dialog"
 import { fetchUsers } from "@/fetchers/fetchUser/fetchUser"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Mail, MapPin, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/Button/button"
+import { UserCard } from "@/features/UserCard/UserCard"
+import type { User } from "@/types/types"
+import { getInitials } from "@/helpers/helpers"
 
 export const UsersList = () => {
   const queryClient = useQueryClient()
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: fetchUsers,
   })
+
+  function handleUserClick(user: User) {
+    setSelectedUser(user)
+    setIsDialogOpen(true)
+  }
+
+
+  function handleDialogClose() {
+    setIsDialogOpen(false)
+    setSelectedUser(null)
+  }
 
   if (isLoading) {
     return (
@@ -59,48 +82,53 @@ export const UsersList = () => {
     )
   }
 
-  const getInitials = (name: string): string => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  };
-
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {data.map((user) => (
-        <Card key={user.id} className="hover:shadow-md/10 transition-shadow">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <Avatar>
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg truncate">{user.name}</CardTitle>
-                <CardDescription className="truncate">@{user.username}</CardDescription>
+    <>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        {data.map((user) => (
+          <Card
+            key={user.id}
+            className="hover:shadow-md/10 transition-shadow cursor-pointer"
+            onClick={() => handleUserClick(user)}
+          >
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <Avatar>
+                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg truncate">{user.name}</CardTitle>
+                  <CardDescription className="truncate">@{user.username}</CardDescription>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="size-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground truncate lowercase">{user.email}</span>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="size-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground truncate lowercase">{user.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="size-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">{user.address.city}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Building2 className="size-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground truncate">{user.company.name}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="size-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{user.address.city}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Building2 className="size-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground truncate">{user.company.name}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+          </DialogHeader>
+          {selectedUser && <UserCard user={selectedUser} />}
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
