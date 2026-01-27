@@ -1,8 +1,12 @@
+import { UsersList } from "./features/UsersList/UsersList"
+
 function App() {
+
+  
   return (
     <>
-      <div className="flex justify-center items-center h-screen">
-        <h1 className="text-2xl font-bold text-blue-500">Hello World!</h1>
+      <div className="max-w-6xl mx-auto flex flex-col">
+        <UsersList />
       </div>
     </>
   )
