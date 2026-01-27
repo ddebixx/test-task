@@ -95,7 +95,7 @@ export default function UserPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 flex flex-col gap-6">
+    <div className="max-w-6xl w-full mx-auto mt-6 flex flex-col gap-6">
       <div className="flex items-center justify-start gap-2">
         <Button
           variant="outline"

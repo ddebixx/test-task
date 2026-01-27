@@ -56,3 +56,27 @@ export const userSchema = z.object({
 })
 
 export type User = z.infer<typeof userSchema>
+
+export const createUserSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address"),
+  address: addressSchema,
+  phone: z.string().min(1, "Phone is required"),
+  website: z.string().min(1, "Website is required"),
+  company: companySchema,
+})
+
+export type CreateUser = z.infer<typeof createUserSchema>
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1, "Name is required").optional(),
+  username: z.string().min(1, "Username is required").optional(),
+  email: z.string().email("Invalid email address").optional(),
+  address: addressSchema.optional(),
+  phone: z.string().min(1, "Phone is required").optional(),
+  website: z.string().min(1, "Website is required").optional(),
+  company: companySchema.optional(),
+})
+
+export type UpdateUser = z.infer<typeof updateUserSchema>
