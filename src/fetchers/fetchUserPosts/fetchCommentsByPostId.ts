@@ -1,0 +1,21 @@
+import { API_ENDPOINT } from "@/consts/consts"
+import { commentSchema } from "@/types/types"
+import type { Comment } from "@/types/types"
+
+export async function fetchCommentsByPostId(postId: number): Promise<Comment[]> {
+  const response = await fetch(`${API_ENDPOINT}/posts/${postId}/comments`)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch comments: ${response.statusText}`)
+  }
+
+  const data = await response.json()
+
+  try {
+    return commentSchema.array().parse(data)
+  } catch (error) {
+    throw new Error(
+      `Invalid comment data format: ${error instanceof Error ? error.message : String(error)}`
+    )
+  }
+}

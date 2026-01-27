@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/Button/button"
 import { ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
 import { UserCardHeader } from "@/features/UserCard/UserCardHeader"
+import { UserPosts } from "@/features/UserPosts/UserPosts"
+
+// I decided to use a separate page for the user details, posts and comments
+// so it will be easier to manage the data and keep UI more organized
+
 
 export default function UserPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -69,16 +74,21 @@ export default function UserPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Button
-        variant="outline"
-        onClick={() => navigate(-1)}
-        className="mb-6"
-      >
-        <ArrowLeft className="size-4 mr-2" />
-        Back
-      </Button>
-      <UserCardHeader user={data} />
+    <div className="max-w-4xl mx-auto mt-6 flex flex-col gap-6">
+      <div className="flex items-center justify-start">
+        <Button
+          variant="outline"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="size-4 mr-2" />
+          Back
+        </Button>
+      </div>
+      <div className="flex flex-col gap-6">
+        <UserCardHeader user={data} />
+        <UserPosts />
+      </div>
     </div>
   )
 }
