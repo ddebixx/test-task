@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/Button/button"
-import { CardContent } from "@/components/ui/Card/card"
+import { Button } from "@/components/ui/Button/Button"
+import { CardContent } from "@/components/ui/Card/Card"
 import type { User } from "@/types/types"
 import { UserCardHeader } from "./UserCardHeader"
 import { UserCardContact } from "./UserCardContact"

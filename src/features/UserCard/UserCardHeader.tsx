@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar/avatar"
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/card"
+import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { getInitials } from "@/helpers/helpers"
 import type { User } from "@/types/types"
 

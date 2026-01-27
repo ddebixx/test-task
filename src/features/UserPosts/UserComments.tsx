@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient, onlineManager, useIsRestoring } from "@tanstack/react-query"
 import { fetchCommentsByPostId } from "@/fetchers/fetchUserPosts/fetchCommentsByPostId"
 import type { Comment } from "@/types/types"
-import { Button } from "@/components/ui/Button/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card/card"
-import { Skeleton } from "@/components/ui/Skeleton/skeleton"
+import { Button } from "@/components/ui/Button/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card/Card"
+import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { MessageSquare, ChevronDown, ChevronUp, Mail } from "lucide-react"
 
 interface UserCommentsProps {
@@ -14,15 +14,19 @@ interface UserCommentsProps {
 export const UserComments = ({ postId }: UserCommentsProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const queryClient = useQueryClient()
+  const isRestoring = useIsRestoring()
 
-  // For this task puproses I decided to fetch comments separately 
+  // For this task purposes I decided to fetch comments separately 
   // when user opens the comments section
   // to reduce loading time of the page
 
-  const { data, isLoading, error } = useQuery({
+  const cachedData = queryClient.getQueryData(['comments', postId])
+  const shouldFetch = onlineManager.isOnline() && !isRestoring
+
+  const { data, isLoading, error, isPaused } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => fetchCommentsByPostId(postId),
-    enabled: isExpanded,
+    enabled: isExpanded && (!!cachedData || shouldFetch),
   })
 
   const hasError = !!error
@@ -57,7 +61,15 @@ export const UserComments = ({ postId }: UserCommentsProps) => {
 
       {isExpanded && (
         <div className="mt-4 space-y-3 pt-4 border-t">
-          {isLoading && (
+          {isPaused && !data && (
+            <div className="flex flex-col items-center justify-center p-4 gap-3 border rounded-lg bg-muted/30">
+              <p className="text-sm text-muted-foreground">
+                We're offline and have no data to show :(
+              </p>
+            </div>
+          )}
+
+          {isLoading && !cachedData && (
             <div className="space-y-3">
               {Array.from({ length: 2 }).map((_, i) => (
                 <Card key={i}>

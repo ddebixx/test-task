@@ -1,29 +1,30 @@
 import { useState } from "react"
-import { Skeleton } from "@/components/ui/Skeleton/skeleton"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/card"
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar/avatar"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-} from "@/components/ui/dialog"
+import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
+import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
 import { fetchUsers } from "@/fetchers/fetchUser/fetchUser"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient, onlineManager, useIsRestoring } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Mail, MapPin, Building2 } from "lucide-react"
-import { Button } from "@/components/ui/Button/button"
+import { Button } from "@/components/ui/Button/Button"
 import { UserCard } from "@/features/UserCard/UserCard"
 import type { User } from "@/types/types"
 import { getInitials } from "@/helpers/helpers"
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/Dialog/Dialog"
 
 export const UsersList = () => {
   const queryClient = useQueryClient()
+  const isRestoring = useIsRestoring()
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const { data, isLoading, error } = useQuery({
+  const cachedData = queryClient.getQueryData(['users'])
+  const shouldFetch = onlineManager.isOnline() && !isRestoring
+
+  const { data, isLoading, error, isPaused } = useQuery({
     queryKey: ['users'],
     queryFn: fetchUsers,
+    enabled: !!cachedData || shouldFetch,
   })
 
   function handleUserClick(user: User) {
@@ -37,7 +38,15 @@ export const UsersList = () => {
     setSelectedUser(null)
   }
 
-  if (isLoading) {
+  if (isPaused && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 gap-4">
+        <p className="text-muted-foreground">We're offline and have no data to show :(</p>
+      </div>
+    )
+  }
+
+  if (isLoading && !cachedData) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -63,7 +72,7 @@ export const UsersList = () => {
     )
   }
 
-  if (error) {
+  if (error && !data) {
     toast.error("Failed to load users")
 
     return (
