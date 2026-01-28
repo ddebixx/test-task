@@ -6,7 +6,8 @@
   "license": "proprietary",
   "author": "andrii_naida",
   "scripts": {
-    "dev": "vite",
+    "check": "npm run lint && npm run test:ci && npm run knip",
+    "dev": "npm run check && vite",
     "build": "vite build",
     "test": "vitest",
     "test:ci": "vitest run",
