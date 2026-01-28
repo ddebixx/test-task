@@ -24,7 +24,7 @@ describe("<Avatar />", () => {
     it("should render avatar with different sizes", () => {
       const sizes = ["default", "sm", "lg"] as const;
 
-      sizes.forEach((size) => {
+      for (const size of sizes) {
         const { unmount } = render(
           <Avatar size={size}>
             <AvatarFallback>AB</AvatarFallback>
@@ -33,7 +33,7 @@ describe("<Avatar />", () => {
         const avatar = screen.getByText("AB").closest('[data-slot="avatar"]');
         expect(avatar).toHaveAttribute("data-size", size);
         unmount();
-      });
+      }
     });
 
     it("should apply custom className", () => {

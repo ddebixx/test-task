@@ -122,7 +122,7 @@ describe("<Pagination />", () => {
     it("should render with different sizes", () => {
       const sizes = ["default", "xs", "sm", "lg", "icon"] as const;
       
-      sizes.forEach((size) => {
+      for (const size of sizes) {
         const { unmount } = render(
           <Pagination>
             <PaginationContent>
@@ -134,7 +134,7 @@ describe("<Pagination />", () => {
         );
         expect(screen.getByText(size)).toBeInTheDocument();
         unmount();
-      });
+      }
     });
 
     it("should apply custom className", () => {

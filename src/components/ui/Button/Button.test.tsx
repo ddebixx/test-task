@@ -15,23 +15,23 @@ describe("<Button />", () => {
     it("should render button with all variants", () => {
       const variants = ["default", "destructive", "outline", "secondary", "ghost", "link"] as const;
       
-      variants.forEach((variant) => {
+      for (const variant of variants) {
         const { unmount } = render(<Button variant={variant}>Test {variant}</Button>);
         const button = screen.getByRole("button", { name: `Test ${variant}` });
         expect(button).toHaveAttribute("data-variant", variant);
         unmount();
-      });
+      }
     });
 
     it("should render button with all sizes", () => {
       const sizes = ["default", "xs", "sm", "lg", "icon", "icon-xs", "icon-sm", "icon-lg"] as const;
       
-      sizes.forEach((size) => {
+      for (const size of sizes) {
         const { unmount } = render(<Button size={size}>Test {size}</Button>);
         const button = screen.getByRole("button", { name: `Test ${size}` });
         expect(button).toHaveAttribute("data-size", size);
         unmount();
-      });
+      }
     });
 
     it("should apply custom className", () => {
