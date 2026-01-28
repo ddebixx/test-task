@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
 import { UserCardHeader } from "@/features/UserCard/UserCardHeader"
 import { UserPosts } from "@/features/UserPosts/UserPosts"
+import type { User } from "@/types/types"
 
 // I decided to use a separate page for the user details, posts and comments
 // so it will be easier to manage the data and keep UI more organized
@@ -17,13 +18,14 @@ export default function UserPage() {
   const queryClient = useQueryClient()
   const isRestoring = useIsRestoring()
 
-  const cachedData = queryClient.getQueryData(['user', slug])
-  const shouldFetch = onlineManager.isOnline() && !isRestoring
+  const cachedData = queryClient.getQueryData<User>(['user', slug])
+  const shouldFetch = onlineManager.isOnline() && !isRestoring && !cachedData
 
   const { data, isLoading, error, isPaused } = useQuery({
     queryKey: ['user', slug],
     queryFn: () => fetchUserById(slug!),
-    enabled: !!slug && (!!cachedData || shouldFetch),
+    enabled: !!slug && shouldFetch,
+    initialData: cachedData,
   })
 
   if (isLoading) {

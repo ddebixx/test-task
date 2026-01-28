@@ -3,12 +3,10 @@ import { UsersList } from "./features/UsersList/UsersList"
 import { Navbar } from "./components/Navbar/Navbar"
 import UserPage from "./pages/user/[slug]/page"
 import UserManagement from "./pages/user-management/page"
-import { OfflineIndicator } from "./components/OfflineIndicator/OfflineIndicator"
 
 function App() {
   return (
     <BrowserRouter>
-      <OfflineIndicator />
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         <Navbar />
         <Routes>

@@ -15,7 +15,6 @@ import { registerSW } from 'virtual:pwa-register'
 // This enables the app to work completely offline by caching HTML, CSS, JS, and API responses
 const updateSW = registerSW({
   onNeedRefresh() {
-    // Called when new content is available
     if (confirm('New content available. Reload to update?')) {
       updateSW(true)
     }
