@@ -6,7 +6,7 @@ This is a **User Management APP** built with **React + TypeScript + Vite** on to
 - **User details**: full profile (address, phone, website, company).
 - **Posts & comments**: user posts and their comments.
 - **User CRUD**: create / edit / delete users with validation and success toasts.
-- **Extras**: offline‑aware UX, unit tests, and static build ready for deployment.
+- **Extras**: **full offline support (PWA)**, offline‑aware UX, unit tests, and static build ready for deployment.
 
 ---
 
@@ -46,17 +46,51 @@ npm run knip       # unused files/exports
 
 ---
 
+## Testing Offline Functionality
+
+The app is a **Progressive Web App (PWA)** that works completely offline:
+
+1. **First visit (online)**:
+   - Open the app in your browser
+   - Browse users, view details, posts, and comments
+   - The Service Worker caches all assets and API responses
+
+2. **Test offline mode**:
+   - Open DevTools → Network tab
+   - Check "Offline" checkbox
+   - **Refresh the page** or open a new tab
+   - ✅ The app loads instantly from cache
+   - ✅ You see a yellow banner: "You are offline. Using cached data."
+   - ✅ All previously loaded data is available
+
+3. **Mutations while offline**:
+   - Try to create/edit/delete a user while offline
+   - Mutations are **queued automatically**
+   - Go back online
+   - ✅ Queued mutations execute automatically
+
+4. **Install as PWA** (optional):
+   - Chrome/Edge: Look for install icon in address bar
+   - The app runs as a standalone application
+   - Opens in its own window without browser chrome
+
+---
+
 ## Why it was implemented this way
 
 - **Type safety & validation**
   - TypeScript + **Zod** schemas in `src/types/types.ts` ensure JSONPlaceholder responses match the expected shape.
   - Fetchers in `src/fetchers/**` are the single source of truth for HTTP + validation.
 
-- **Offline‑friendly data layer**
+- **Offline‑first architecture**
+  - **Service Worker + PWA** (via `vite-plugin-pwa`) caches the entire app (HTML, CSS, JS, and API responses).
+  - The app **works completely offline** – you can refresh the page or open a new tab without connection.
   - **TanStack React Query** manages caching, background refetching, and network status.
   - `PersistQueryClientProvider` + `createSyncStoragePersister` store queries in `localStorage`, so:
     - data is available offline when previously loaded,
     - mutations are paused while offline and resumed automatically.
+  - **Offline indicator** shows a banner when you're working with cached data.
+  - **NetworkFirst** strategy for API calls ensures fresh data when online, cached data when offline.
   - Queries use `onlineManager` and `useIsRestoring` to show clear loading, error, and offline‑no‑data states.
 
 - **Clear separation of concerns**
@@ -93,4 +127,4 @@ npm run knip       # unused files/exports
 - **Szczegóły użytkownika / User details** – `/users/:slug` with full address, phone, website, and company.
 - **Posty i komentarze / Posts & comments** – posts (`GET /posts?userId={id}`) and comments per post on the user detail page.
 - **CRUD użytkowników / User CRUD** – create/edit/delete via POST/PUT/DELETE, Zod‑validated forms, success notifications.
-- **Mile widziane** – offline‑aware UX, unit tests, and a static Vite build ready for hosting (e.g. Cloudflare Pages).
+- **Mile widziane** – **full offline PWA support** (works even when refreshing offline), offline‑aware UX with indicator, unit tests, and a static Vite build ready for hosting (e.g. Cloudflare Pages, Vercel).
