@@ -7,13 +7,13 @@ import UserManagement from "./pages/user-management/page"
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background text-foreground">
         <Navbar />
         <Routes>
           <Route
             path="/"
             element={
-              <div className="max-w-6xl mx-auto flex flex-col w-full">
+              <div className="max-w-4xl mx-auto flex flex-col w-full">
                 <UsersList />
               </div>
             }

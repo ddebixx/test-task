@@ -2,7 +2,6 @@ import { useState } from "react"
 import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
-import { fetchUsers } from "@/fetchers/fetchUser/fetchUser"
 import { useQuery, useQueryClient, onlineManager, useIsRestoring } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Mail, MapPin, Building2 } from "lucide-react"
@@ -11,15 +10,9 @@ import { UserCard } from "@/features/UserCard/UserCard"
 import type { User } from "@/types/types"
 import { getInitials } from "@/helpers/helpers"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/Dialog/Dialog"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/Pagination/Pagination"
+import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePagination } from "@/hooks/usePagination"
+import { fetchUsers } from "@/fetchers/fetchUser/fetchUser"
 
 export const UsersList = () => {
   const queryClient = useQueryClient()
@@ -102,7 +95,7 @@ export const UsersList = () => {
     )
   }
 
-  if (!data || data.length === 0) {
+  if (!data || users.length === 0) {
     return (
       <div className="flex items-center justify-center p-6">
         <p className="text-muted-foreground">No users found</p>
@@ -150,52 +143,15 @@ export const UsersList = () => {
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center pb-6">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    goToPreviousPage()
-                  }}
-                />
-              </PaginationItem>
-
-              {Array.from({ length: totalPages }).map((_, index) => {
-                const pageNumber = index + 1
-
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      href="#"
-                      isActive={pageNumber === page}
-                      onClick={(event) => {
-                        event.preventDefault()
-                        goToPage(pageNumber)
-                      }}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              })}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    goToNextPage()
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <div className="pb-6">
+        <PaginationWrapper
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          onNextPage={goToNextPage}
+          onPreviousPage={goToPreviousPage}
+        />
+      </div>
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

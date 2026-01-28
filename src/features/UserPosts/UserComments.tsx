@@ -3,7 +3,6 @@ import { useQuery, useQueryClient, onlineManager, useIsRestoring } from "@tansta
 import { fetchCommentsByPostId } from "@/fetchers/fetchUserPosts/fetchCommentsByPostId"
 import type { Comment } from "@/types/types"
 import { Button } from "@/components/ui/Button/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { MessageSquare, ChevronDown, ChevronUp, Mail } from "lucide-react"
 
@@ -44,53 +43,47 @@ export const UserComments = ({ postId }: UserCommentsProps) => {
       <Button
         variant="ghost"
         onClick={handleToggle}
-        className="w-full justify-between p-0 h-auto font-normal"
+        className="w-full justify-between px-0 h-auto font-normal hover:bg-transparent"
       >
-        <div className="flex items-center gap-2">
-          <MessageSquare className="size-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {isExpanded ? "Hide" : "Show"} comments
+        <div className="flex items-center gap-1.5">
+          <MessageSquare className="size-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
+            {isExpanded ? "Hide" : "View"} comments
           </span>
         </div>
         {isExpanded ? (
-          <ChevronUp className="size-4 text-muted-foreground" />
+          <ChevronUp className="size-3.5 text-muted-foreground" />
         ) : (
-          <ChevronDown className="size-4 text-muted-foreground" />
+          <ChevronDown className="size-3.5 text-muted-foreground" />
         )}
       </Button>
 
       {isExpanded && (
-        <div className="mt-4 space-y-3 pt-4 border-t">
+        <div className="mt-3 space-y-2 pt-3 border-t">
           {isPaused && !data && (
-            <div className="flex flex-col items-center justify-center p-4 gap-3 border rounded-lg bg-muted/30">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col items-center justify-center p-3 gap-2 rounded-md bg-muted/50">
+              <p className="text-xs text-muted-foreground">
                 We're offline and have no data to show :(
               </p>
             </div>
           )}
 
           {isLoading && !cachedData && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {Array.from({ length: 2 }).map((_, i) => (
-                <Card key={i}>
-                  <CardHeader>
-                    <Skeleton className="h-4 w-32 mb-2" />
-                    <Skeleton className="h-3 w-24" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-5/6" />
-                    </div>
-                  </CardContent>
-                </Card>
+                <div key={i} className="p-3 rounded-md bg-muted/50 space-y-2">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-4/5" />
+                </div>
               ))}
             </div>
           )}
 
           {hasError && (
-            <div className="flex flex-col items-center justify-center p-4 gap-3 border rounded-lg bg-muted/30">
-              <p className="text-sm text-destructive">
+            <div className="flex flex-col items-center justify-center p-3 gap-2 rounded-md bg-muted/50">
+              <p className="text-xs text-destructive">
                 Failed to load comments
               </p>
               <Button variant="outline" size="sm" onClick={handleRetry}>
@@ -100,37 +93,33 @@ export const UserComments = ({ postId }: UserCommentsProps) => {
           )}
 
           {!isLoading && !hasError && (!data || data.length === 0) && (
-            <div className="flex flex-col items-center justify-center p-6 border rounded-lg bg-muted/30">
-              <MessageSquare className="size-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No comments yet</p>
+            <div className="flex flex-col items-center justify-center p-4 rounded-md bg-muted/50">
+              <MessageSquare className="size-6 text-muted-foreground mb-1.5" />
+              <p className="text-xs text-muted-foreground">No comments yet</p>
             </div>
           )}
 
           {!isLoading && !hasError && data && data.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {data.map((comment: Comment) => (
-                <Card key={comment.id} className="bg-muted/30 gap-0">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-sm font-semibold line-clamp-1">
-                          {comment.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Mail className="size-3 text-muted-foreground shrink-0" />
-                          <p className="text-xs text-muted-foreground truncate lowercase">
-                            {comment.email}
-                          </p>
-                        </div>
+                <div key={comment.id} className="p-3 rounded-md bg-muted/50 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium line-clamp-1">
+                        {comment.name}
+                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Mail className="size-3 text-muted-foreground shrink-0" />
+                        <p className="text-sm text-muted-foreground truncate lowercase">
+                          {comment.email}
+                        </p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                      {comment.body}
-                    </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {comment.body}
+                  </p>
+                </div>
               ))}
             </div>
           )}

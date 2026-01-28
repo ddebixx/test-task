@@ -95,17 +95,15 @@ export default function UserPage() {
   }
 
   return (
-    <div className="max-w-6xl w-full mx-auto my-6 flex flex-col gap-6">
-      <div className="flex items-center justify-start gap-2">
-        <Button
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          <ArrowLeft className="size-4 mr-2" />
-          Back
-        </Button>
-      </div>
+    <div className="max-w-4xl w-full mx-auto px-4 py-6 flex flex-col gap-4">
+      <Button
+        variant="ghost"
+        onClick={() => navigate(-1)}
+        className="w-fit -ml-2"
+      >
+        <ArrowLeft className="size-4 mr-2" />
+        Back
+      </Button>
       <div className="flex flex-col gap-6">
         <UserCardHeader user={data} />
         <UserPosts />

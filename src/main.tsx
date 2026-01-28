@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import React,{ StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
@@ -6,6 +6,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
+import { ThemeProvider } from 'next-themes'
 
 
 // We are using the createSyncStorage approach to cache data for offline
@@ -32,17 +33,19 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister }}
-      onSuccess={() => {
-        queryClient.resumePausedMutations().then(() => {
-          queryClient.invalidateQueries()
-        })
-      }}
-    >
-      <App />
-      <Toaster position="top-right" />
-    </PersistQueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister }}
+        onSuccess={() => {
+          queryClient.resumePausedMutations().then(() => {
+            queryClient.invalidateQueries()
+          })
+        }}
+      >
+        <App />
+        <Toaster position="top-right" />
+      </PersistQueryClientProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

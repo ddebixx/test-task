@@ -5,33 +5,17 @@ import { useCreateUserMutation } from "@/mutations/user/createUserMutation"
 import { useUpdateUserMutation } from "@/mutations/user/updateUserMutation"
 import { useDeleteUserMutation } from "@/mutations/user/deleteUserMutation"
 import { UserForm } from "@/features/UserManagement/UserForm"
+import { DeleteUserDialog } from "@/features/UserManagement/DeleteUserDialog"
 import { Button } from "@/components/ui/Button/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
 import { Dialog, DialogContent } from "@/components/ui/Dialog/Dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/AlertDialog/AlertDialog"
 import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { getInitials } from "@/helpers/helpers"
 import { Mail, MapPin, Building2, Plus, Edit, Trash2 } from "lucide-react"
 import type { User } from "@/types/types"
 import type { CreateUser } from "@/types/types"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/Pagination/Pagination"
+import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePagination } from "@/hooks/usePagination"
 
 export default function UserManagement() {
@@ -120,7 +104,7 @@ export default function UserManagement() {
 
   if (isLoading) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-6">
         <div className="mb-6 flex justify-between items-center">
           <Skeleton className="h-9 w-32" />
         </div>
@@ -151,7 +135,7 @@ export default function UserManagement() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-6">
         <div className="flex flex-col items-center justify-center gap-4">
           <p className="text-destructive">Failed to load users</p>
           <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: ["users"] })}>
@@ -163,7 +147,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="max-w-6xl w-full mx-auto p-6">
+    <div className="max-w-4xl w-full mx-auto p-6">
       <div className="mb-6 flex justify-end items-center">
         <Button onClick={handleCreateClick}>
           <Plus className="size-4" />
@@ -184,9 +168,9 @@ export default function UserManagement() {
                   <Avatar>
                     <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg truncate max-w-[160px]">{user.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground truncate max-w-[160px]">@{user.username}</p>
+                  <div className="flex-1 min-w-0 max-w-[160px]">
+                    <CardTitle className="text-lg truncate max-w-[140px]">{user.name}</CardTitle>
+                    <span className="text-sm text-muted-foreground truncate max-w-[160px]">@{user.username}</span>
                   </div>
                 </div>
               </CardHeader>
@@ -204,12 +188,12 @@ export default function UserManagement() {
                     <Building2 className="size-4 text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground truncate min-w-0 max-w-[160px]">{user.company.name}</span>
                   </div>
-                  <div className="flex gap-2 pt-2">
+                  <div className="max-[480px]:flex-col flex gap-2 pt-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEditClick(user)}
-                      className="flex-1"
+                      className="max-[480px]:w-full"
                     >
                       <Edit className="size-4" />
                       Edit
@@ -218,7 +202,7 @@ export default function UserManagement() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDeleteClick(user)}
-                      className="flex-1"
+                      className="max-[480px]:w-full"
                       disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="size-4" />
@@ -232,52 +216,13 @@ export default function UserManagement() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="flex justify-center pt-6">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    goToPreviousPage()
-                  }}
-                />
-              </PaginationItem>
-
-              {Array.from({ length: totalPages }).map((_, index) => {
-                const pageNumber = index + 1
-
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      href="#"
-                      isActive={pageNumber === page}
-                      onClick={(event) => {
-                        event.preventDefault()
-                        goToPage(pageNumber)
-                      }}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              })}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    goToNextPage()
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <PaginationWrapper
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+        onNextPage={goToNextPage}
+        onPreviousPage={goToPreviousPage}
+      />
 
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -290,26 +235,13 @@ export default function UserManagement() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={handleDeleteDialogChange}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete User</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {userToDelete?.name}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteUserDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={handleDeleteDialogChange}
+        userName={userToDelete?.name || null}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deleteMutation.isPending}
+      />
     </div>
   )
 }
