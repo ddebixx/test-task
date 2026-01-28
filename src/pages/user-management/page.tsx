@@ -24,6 +24,15 @@ import { getInitials } from "@/helpers/helpers"
 import { Mail, MapPin, Building2, Plus, Edit, Trash2 } from "lucide-react"
 import type { User } from "@/types/types"
 import type { CreateUser } from "@/types/types"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/Pagination/Pagination"
+import { usePagination } from "@/hooks/usePagination"
 
 export default function UserManagement() {
   const queryClient = useQueryClient()
@@ -37,26 +46,36 @@ export default function UserManagement() {
     queryFn: fetchUsers,
   })
 
+  const userList = users ?? []
+  const {
+    page,
+    totalPages,
+    paginatedItems: paginatedUsers,
+    goToNextPage,
+    goToPage,
+    goToPreviousPage,
+  } = usePagination<User>({ items: userList })
+
   const createMutation = useCreateUserMutation()
   const updateMutation = useUpdateUserMutation()
   const deleteMutation = useDeleteUserMutation()
 
-  function handleCreateClick() {
+  const handleCreateClick = () => {
     setEditingUser(null)
     setIsFormDialogOpen(true)
   }
 
-  function handleEditClick(user: User) {
+  const handleEditClick = (user: User) => {
     setEditingUser(user)
     setIsFormDialogOpen(true)
   }
 
-  function handleDeleteClick(user: User) {
+  const handleDeleteClick = (user: User) => {
     setUserToDelete(user)
     setIsDeleteDialogOpen(true)
   }
 
-  function handleDeleteConfirm() {
+  const handleDeleteConfirm = () => {
     if (userToDelete) {
       deleteMutation.mutate(userToDelete.id, {
         onSuccess: () => {
@@ -67,14 +86,14 @@ export default function UserManagement() {
     }
   }
 
-  function handleDeleteDialogChange(open: boolean) {
+  const handleDeleteDialogChange = (open: boolean) => {
     setIsDeleteDialogOpen(open)
     if (!open) {
       setUserToDelete(null)
     }
   }
 
-  function handleFormSubmit(data: CreateUser) {
+  const handleFormSubmit = (data: CreateUser) => {
     if (editingUser) {
       updateMutation.mutate(
         { userId: editingUser.id, data },
@@ -94,7 +113,7 @@ export default function UserManagement() {
     }
   }
 
-  function handleFormCancel() {
+  const handleFormCancel = () => {
     setIsFormDialogOpen(false)
     setEditingUser(null)
   }
@@ -158,7 +177,7 @@ export default function UserManagement() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {users.map((user) => (
+          {paginatedUsers.map((user) => (
             <Card key={user.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-4">
@@ -210,6 +229,53 @@ export default function UserManagement() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center pt-6">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    goToPreviousPage()
+                  }}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: totalPages }).map((_, index) => {
+                const pageNumber = index + 1
+
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      isActive={pageNumber === page}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        goToPage(pageNumber)
+                      }}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    goToNextPage()
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
 

@@ -19,40 +19,28 @@ export const commentSchema = z.object({
 
 export type Comment = z.infer<typeof commentSchema>
 
-export const geoSchema = z.object({
-  lat: z.string(),
-  lng: z.string(),
-})
-
-export type Geo = z.infer<typeof geoSchema>
-
-export const addressSchema = z.object({
-  street: z.string(),
-  suite: z.string(),
-  city: z.string(),
-  zipcode: z.string(),
-  geo: geoSchema,
-})
-
-export type Address = z.infer<typeof addressSchema>
-
-export const companySchema = z.object({
-  name: z.string(),
-  catchPhrase: z.string(),
-  bs: z.string(),
-})
-
-export type Company = z.infer<typeof companySchema>
-
 export const userSchema = z.object({
   id: z.number(),
   name: z.string(),
   username: z.string(),
   email: z.string(),
-  address: addressSchema,
+  address: z.object({
+    street: z.string(),
+    suite: z.string(),
+    city: z.string(),
+    zipcode: z.string(),
+    geo: z.object({
+      lat: z.string(),
+      lng: z.string(),
+    }),
+  }),
   phone: z.string(),
   website: z.string(),
-  company: companySchema,
+  company: z.object({
+    name: z.string(),
+    catchPhrase: z.string(),
+    bs: z.string(),
+  }),
 })
 
 export type User = z.infer<typeof userSchema>
@@ -61,10 +49,23 @@ export const createUserSchema = z.object({
   name: z.string().min(1, "Name is required"),
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Invalid email address"),
-  address: addressSchema,
+    address: z.object({
+    street: z.string(),
+    suite: z.string(),
+    city: z.string(),
+    zipcode: z.string(),
+    geo: z.object({
+      lat: z.string(),
+      lng: z.string(),
+    }),
+  }),
   phone: z.string().min(1, "Phone is required"),
   website: z.string().min(1, "Website is required"),
-  company: companySchema,
+  company: z.object({
+    name: z.string(),
+    catchPhrase: z.string(),
+    bs: z.string(),
+  }),
 })
 
 export type CreateUser = z.infer<typeof createUserSchema>
@@ -73,10 +74,23 @@ export const updateUserSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   username: z.string().min(1, "Username is required").optional(),
   email: z.string().email("Invalid email address").optional(),
-  address: addressSchema.optional(),
+  address: z.object({
+    street: z.string(),
+    suite: z.string(),
+    city: z.string(),
+    zipcode: z.string(),
+    geo: z.object({
+      lat: z.string(),
+      lng: z.string(),
+    }),
+  }).optional(),
   phone: z.string().min(1, "Phone is required").optional(),
   website: z.string().min(1, "Website is required").optional(),
-  company: companySchema.optional(),
+  company: z.object({
+    name: z.string(),
+    catchPhrase: z.string(),
+    bs: z.string(),
+  }).optional(),
 })
 
 export type UpdateUser = z.infer<typeof updateUserSchema>

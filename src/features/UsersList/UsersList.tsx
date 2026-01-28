@@ -11,6 +11,15 @@ import { UserCard } from "@/features/UserCard/UserCard"
 import type { User } from "@/types/types"
 import { getInitials } from "@/helpers/helpers"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/Dialog/Dialog"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/Pagination/Pagination"
+import { usePagination } from "@/hooks/usePagination"
 
 export const UsersList = () => {
   const queryClient = useQueryClient()
@@ -26,6 +35,16 @@ export const UsersList = () => {
     queryFn: fetchUsers,
     enabled: !!cachedData || shouldFetch,
   })
+
+  const users = data ?? []
+  const {
+    page,
+    totalPages,
+    paginatedItems: paginatedUsers,
+    goToNextPage,
+    goToPage,
+    goToPreviousPage,
+  } = usePagination<User>({ items: users })
 
   function handleUserClick(user: User) {
     setSelectedUser(user)
@@ -94,7 +113,7 @@ export const UsersList = () => {
   return (
     <>
       <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {data.map((user) => (
+        {paginatedUsers.map((user) => (
           <Card
             key={user.id}
             className="hover:shadow-md/10 transition-shadow cursor-pointer"
@@ -130,6 +149,53 @@ export const UsersList = () => {
           </Card>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center pb-6">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    goToPreviousPage()
+                  }}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: totalPages }).map((_, index) => {
+                const pageNumber = index + 1
+
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      isActive={pageNumber === page}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        goToPage(pageNumber)
+                      }}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    goToNextPage()
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

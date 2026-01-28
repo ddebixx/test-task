@@ -15,11 +15,21 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/Button/Button"
 import { FileText, MessageSquare } from "lucide-react"
 import { UserComments } from "./UserComments"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/Pagination/Pagination"
+import { usePagination } from "@/hooks/usePagination"
 
 export const UserPosts = () => {
     const { slug } = useParams<{ slug: string }>()
     const userId = slug!
     const queryClient = useQueryClient()
+
     const isRestoring = useIsRestoring()
 
     const cachedData = queryClient.getQueryData(['userPosts', userId])
@@ -30,6 +40,16 @@ export const UserPosts = () => {
         queryFn: () => fetchUserPostsByUserId(userId),
         enabled: !!userId && (!!cachedData || shouldFetch),
     })
+
+    const posts = data ?? []
+    const {
+      page,
+      totalPages,
+      paginatedItems: paginatedPosts,
+      goToNextPage,
+      goToPage,
+      goToPreviousPage,
+    } = usePagination<Post>({ items: posts })
 
     if (isPaused && !data) {
         return (
@@ -119,8 +139,8 @@ export const UserPosts = () => {
                 <h2 className="text-2xl font-semibold">Posts</h2>
                 <span className="text-sm text-muted-foreground">({data.length})</span>
             </div>
-            <div className="space-y-4">
-                {data.map((post: Post) => (
+                <div className="space-y-4">
+                {paginatedPosts.map((post: Post) => (
                     <Card
                         key={post.id}
                         className="hover:shadow-md transition-shadow cursor-pointer"
@@ -140,6 +160,53 @@ export const UserPosts = () => {
                     </Card>
                 ))}
             </div>
+
+            {totalPages > 1 && (
+                <div className="flex justify-center pb-6">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href="#"
+                                    onClick={(event) => {
+                                        event.preventDefault()
+                                        goToPreviousPage()
+                                    }}
+                                />
+                            </PaginationItem>
+
+                            {Array.from({ length: totalPages }).map((_, index) => {
+                                const pageNumber = index + 1
+
+                                return (
+                                    <PaginationItem key={pageNumber}>
+                                        <PaginationLink
+                                            href="#"
+                                            isActive={pageNumber === page}
+                                            onClick={(event) => {
+                                                event.preventDefault()
+                                                goToPage(pageNumber)
+                                            }}
+                                        >
+                                            {pageNumber}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                )
+                            })}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    onClick={(event) => {
+                                        event.preventDefault()
+                                        goToNextPage()
+                                    }}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
         </div>
     )
 }
