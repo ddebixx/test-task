@@ -30,7 +30,7 @@ export const usePagination = <TItem,>({
   )
 
   useEffect(() => {
-    function synchronizePageWithTotalPages() {
+     const synchronizePageWithTotalPages = () => {
       if (page > totalPages) {
         setPage(totalPages)
       }
@@ -38,7 +38,7 @@ export const usePagination = <TItem,>({
       if (page < 1) {
         setPage(1)
       }
-    }
+    };
 
     synchronizePageWithTotalPages()
   }, [page, totalPages])

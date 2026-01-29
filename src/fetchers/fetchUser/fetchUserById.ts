@@ -2,7 +2,7 @@ import { API_ENDPOINT } from "@/consts/consts"
 import { userSchema } from "@/types/types"
 import type { User } from "@/types/types"
 
-export async function fetchUserById(userId: string): Promise<User> {
+export const fetchUserById = async (userId: string): Promise<User> => {
   const response = await fetch(`${API_ENDPOINT}/users/${userId}`)
 
   if (!response.ok) {

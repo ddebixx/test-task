@@ -27,7 +27,7 @@ export const PaginationWrapper = ({
   }
 
   return (
-    <div className="flex justify-center pt-6">
+    <nav className="flex justify-center pt-6" aria-label="Pagination">
       <Pagination>
         <PaginationContent>
           <PaginationItem>
@@ -70,6 +70,6 @@ export const PaginationWrapper = ({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-    </div>
+    </nav>
   )
 }

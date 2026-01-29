@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createUserSchema, type CreateUser } from "@/types/types"
+import { userToCreateUserDefaults } from "@/utils/userFormDefaults"
 import { Input } from "@/components/ui/Input/Input"
 import { Button } from "@/components/ui/Button/Button"
 import { Card, CardContent } from "@/components/ui/Card/Card"
@@ -20,41 +21,18 @@ export const UserForm = ({ user, onSubmit, onCancel, isLoading }: UserFormProps)
     formState: { errors },
   } = useForm<CreateUser>({
     resolver: zodResolver(createUserSchema),
-    defaultValues: user
-      ? {
-          name: user.name,
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          website: user.website,
-          address: {
-            street: user.address.street,
-            suite: user.address.suite,
-            city: user.address.city,
-            zipcode: user.address.zipcode,
-            geo: {
-              lat: user.address.geo.lat,
-              lng: user.address.geo.lng,
-            },
-          },
-          company: {
-            name: user.company.name,
-            catchPhrase: user.company.catchPhrase,
-            bs: user.company.bs,
-          },
-        }
-      : undefined,
+    defaultValues: user ? userToCreateUserDefaults(user) : undefined,
   })
 
-  async function handleFormSubmit(data: CreateUser) {
+  const handleFormSubmit = async (data: CreateUser) => {
     await onSubmit(data)
   }
 
   return (
-    <Card className="border-none p-0 shadow-none">
+    <Card className="border-none p-0 shadow-none" role="region" aria-label="User form">
       <CardContent className="p-0">
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" aria-label={user ? "Edit user" : "Create user"}>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4" aria-label="Basic information">
             <div className="space-y-2 min-w-0">
               <label htmlFor="name" className="text-sm font-medium leading-none">
                 Name
@@ -126,10 +104,12 @@ export const UserForm = ({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                 <p className="text-sm text-destructive">{errors.website.message}</p>
               )}
             </div>
-          </div>
+          </section>
 
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Address</h3>
+          <fieldset className="space-y-4 border-0 p-0 m-0" aria-labelledby="address-legend">
+            <legend id="address-legend" className="text-sm font-semibold mb-0">
+              Address
+            </legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 min-w-0">
                 <label htmlFor="address.street" className="text-sm font-medium leading-none">
@@ -216,10 +196,12 @@ export const UserForm = ({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                 )}
               </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Company</h3>
+          <fieldset className="space-y-4 border-0 p-0 m-0" aria-labelledby="company-legend">
+            <legend id="company-legend" className="text-sm font-semibold mb-0">
+              Company
+            </legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 min-w-0">
                 <label htmlFor="company.name" className="text-sm font-medium leading-none">
@@ -264,9 +246,9 @@ export const UserForm = ({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                 )}
               </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div className="flex gap-2 justify-end">
+          <footer className="flex gap-2 justify-end">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
                 Cancel
@@ -275,7 +257,7 @@ export const UserForm = ({ user, onSubmit, onCancel, isLoading }: UserFormProps)
             <Button type="submit" disabled={isLoading}>
               {isLoading ? "Saving..." : user ? "Update User" : "Create User"}
             </Button>
-          </div>
+          </footer>
         </form>
       </CardContent>
     </Card>

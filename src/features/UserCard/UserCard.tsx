@@ -24,12 +24,12 @@ export const UserCard = ({
 }: UserCardProps) => {
   const navigate = useNavigate()
 
-  function handleNavigate() {
+  const handleNavigate = () => {
     navigate(`/users/${user.id}`)
   }
 
   return (
-    <div className="space-y-6">
+    <article className="space-y-6" aria-label={`User profile: ${user.name}`}>
       <UserCardHeader user={user} />
 
 
@@ -45,13 +45,13 @@ export const UserCard = ({
         </div>
 
         {showNavigateButton && (
-          <div className="pt-4 border-t">
+          <footer className="pt-4 border-t">
             <Button onClick={handleNavigate} className="w-full" size="lg">
               View User Page
             </Button>
-          </div>
+          </footer>
         )}
       </CardContent>
-    </div>
+    </article>
   )
 }

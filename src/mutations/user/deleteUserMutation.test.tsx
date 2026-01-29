@@ -3,6 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDeleteUserMutation } from "./deleteUserMutation";
 import { deleteUser } from "@/fetchers/fetchUser/deleteUser";
+import { usersQueryKey } from "@/queries/usersQueryOptions";
 
 vi.mock("sonner", () => ({
   toast: {
@@ -85,6 +86,6 @@ describe("useDeleteUserMutation", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["users"] });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: usersQueryKey });
   });
 });

@@ -13,9 +13,9 @@ function App() {
           <Route
             path="/"
             element={
-              <div className="max-w-4xl mx-auto flex flex-col w-full">
+              <main className="max-w-4xl mx-auto flex flex-col w-full">
                 <UsersList />
-              </div>
+              </main>
             }
           />
           <Route path="/users/manage" element={<UserManagement />} />

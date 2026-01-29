@@ -1,6 +1,6 @@
 import { API_ENDPOINT } from "@/consts/consts"
 
-export async function deleteUser(userId: number): Promise<void> {
+export const deleteUser = async (userId: number): Promise<void> => {
   const response = await fetch(`${API_ENDPOINT}/users/${userId}`, {
     method: "DELETE",
   })

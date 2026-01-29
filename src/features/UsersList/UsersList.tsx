@@ -1,119 +1,88 @@
 import { useState } from "react"
-import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
-import { useQuery, useQueryClient, onlineManager, useIsRestoring } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Mail, MapPin, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/Button/Button"
 import { UserCard } from "@/features/UserCard/UserCard"
+import { UserListSkeleton } from "@/features/UsersList/UserListSkeleton"
 import type { User } from "@/types/types"
 import { getInitials } from "@/helpers/helpers"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/Dialog/Dialog"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
-import { usePagination } from "@/hooks/usePagination"
-import { fetchUsers } from "@/fetchers/fetchUser/fetchUser"
+import { usePaginatedData } from "@/hooks/usePaginatedData"
+import { useQueryFetchState } from "@/hooks/useQueryFetchState"
+import { usersQueryKey, usersQueryOptions } from "@/queries/usersQueryOptions"
+import { OFFLINE_MESSAGE, USERS_LIST } from "@/consts/messages"
 
 export const UsersList = () => {
   const queryClient = useQueryClient()
-  const isRestoring = useIsRestoring()
+  const { cachedData, shouldFetch } = useQueryFetchState<User[]>(usersQueryKey)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const cachedData = queryClient.getQueryData(['users'])
-  const shouldFetch = onlineManager.isOnline() && !isRestoring
-
   const { data, isLoading, error, isPaused } = useQuery({
-    queryKey: ['users'],
-    queryFn: fetchUsers,
+    ...usersQueryOptions(),
     enabled: !!cachedData || shouldFetch,
   })
 
-  const users = data ?? []
-  const {
-    page,
-    totalPages,
-    paginatedItems: paginatedUsers,
-    goToNextPage,
-    goToPage,
-    goToPreviousPage,
-  } = usePagination<User>({ items: users })
+  const { paginatedItems: paginatedUsers, paginationProps } = usePaginatedData<User>({ data })
 
-  function handleUserClick(user: User) {
+  const handleUserClick = (user: User) => {
     setSelectedUser(user)
     setIsDialogOpen(true)
   }
 
 
-  function handleDialogClose() {
+  const handleDialogClose = () => {
     setIsDialogOpen(false)
     setSelectedUser(null)
   }
 
   if (isPaused && !data) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 gap-4">
-        <p className="text-muted-foreground">We're offline and have no data to show :(</p>
-      </div>
+      <section className="flex flex-col items-center justify-center p-6 gap-4" aria-label="Offline">
+        <p className="text-muted-foreground">{OFFLINE_MESSAGE}</p>
+      </section>
     )
   }
 
   if (isLoading && !cachedData) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <Skeleton className="size-12 rounded-full" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
+    return <UserListSkeleton />
   }
 
   if (error && !data) {
-    toast.error("Failed to load users")
-
+    toast.error(USERS_LIST.ERROR)
     return (
-      <div className="flex flex-col items-center justify-center p-6 gap-4">
-        <p className="text-destructive">Failed to load users</p>
-        <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: ['users'] })}>Retry</Button>
-      </div>
+      <section className="flex flex-col items-center justify-center p-6 gap-4" aria-label="Error loading users">
+        <p className="text-destructive">{USERS_LIST.ERROR}</p>
+        <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}>
+          {USERS_LIST.RETRY}
+        </Button>
+      </section>
     )
   }
 
-  if (!data || users.length === 0) {
+  if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center p-6">
-        <p className="text-muted-foreground">No users found</p>
-      </div>
+      <section className="flex items-center justify-center p-6" aria-label="No users">
+        <p className="text-muted-foreground">{USERS_LIST.EMPTY}</p>
+      </section>
     )
   }
 
   return (
     <>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+      <section className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6" aria-label="Users list">
         {paginatedUsers.map((user) => (
-          <Card
-            key={user.id}
-            className="hover:shadow-md/10 transition-shadow cursor-pointer"
-            onClick={() => handleUserClick(user)}
-          >
-            <CardHeader>
-              <div className="flex items-center gap-4">
+          <article key={user.id}>
+            <Card
+              className="hover:shadow-md/10 transition-shadow cursor-pointer"
+              onClick={() => handleUserClick(user)}
+            >
+              <CardHeader>
+                <div className="flex items-center gap-4">
                 <Avatar>
                   <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                 </Avatar>
@@ -140,17 +109,12 @@ export const UsersList = () => {
               </div>
             </CardContent>
           </Card>
+          </article>
         ))}
-      </div>
+      </section>
 
       <div className="pb-6">
-        <PaginationWrapper
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={goToPage}
-          onNextPage={goToNextPage}
-          onPreviousPage={goToPreviousPage}
-        />
+        <PaginationWrapper {...paginationProps} />
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>

@@ -3,6 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useCreateUserMutation } from "./createUserMutation";
 import { createUser } from "@/fetchers/fetchUser/createUser";
+import { usersQueryKey } from "@/queries/usersQueryOptions";
 import type { CreateUser, User } from "@/types/types";
 
 vi.mock("sonner", () => ({
@@ -201,6 +202,6 @@ describe("useCreateUserMutation", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["users"] });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: usersQueryKey });
   });
 });

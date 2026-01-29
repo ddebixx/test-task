@@ -9,17 +9,14 @@ export const Navbar = () => {
   const location = useLocation()
   const { theme, setTheme } = useTheme()
 
-  function isActive(path: string) {
-    if (path === "/") {
-      return location.pathname === "/"
-    }
+  const isActive = (path: string) => {
     return location.pathname.startsWith(path)
   }
-
-  function toggleTheme() {
+  
+  const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
   }
-
+  
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">

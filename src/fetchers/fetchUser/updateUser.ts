@@ -3,7 +3,7 @@ import { userSchema } from "@/types/types"
 import type { User } from "@/types/types"
 import type { UpdateUser } from "@/types/types"
 
-export async function updateUser(userId: number, userData: UpdateUser): Promise<User> {
+export const updateUser = async (userId: number, userData: UpdateUser): Promise<User> => {
   const response = await fetch(`${API_ENDPOINT}/users/${userId}`, {
     method: "PUT",
     headers: {

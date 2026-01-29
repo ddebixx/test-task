@@ -3,7 +3,7 @@ import { userSchema } from "@/types/types"
 import type { User } from "@/types/types"
 import type { CreateUser } from "@/types/types"
 
-export async function createUser(userData: CreateUser): Promise<User> {
+export const createUser = async (userData: CreateUser): Promise<User> => {
   const response = await fetch(`${API_ENDPOINT}/users`, {
     method: "POST",
     headers: {

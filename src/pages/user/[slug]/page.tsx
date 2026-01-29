@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useQuery, useQueryClient, onlineManager, useIsRestoring } from "@tanstack/react-query"
-import { fetchUserById } from "@/fetchers/fetchUser/fetchUserById"
+import { useQuery } from "@tanstack/react-query"
+import { userQueryKey, userQueryOptions } from "@/queries/userQueryOptions"
+import { useQueryFetchState } from "@/hooks/useQueryFetchState"
 import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { Button } from "@/components/ui/Button/Button"
 import { ArrowLeft } from "lucide-react"
@@ -15,101 +16,104 @@ import type { User } from "@/types/types"
 export default function UserPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const isRestoring = useIsRestoring()
-
-  const cachedData = queryClient.getQueryData<User>(['user', slug])
-  const shouldFetch = onlineManager.isOnline() && !isRestoring && !cachedData
+  const { cachedData, shouldFetch } = useQueryFetchState<User>(userQueryKey(slug!))
 
   const { data, isLoading, error, isPaused } = useQuery({
-    queryKey: ['user', slug],
-    queryFn: () => fetchUserById(slug!),
-    enabled: !!slug && shouldFetch,
+    ...userQueryOptions(slug!),
+    enabled: !!slug && (!!cachedData || shouldFetch),
     initialData: cachedData,
   })
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-6">
+      <main className="max-w-4xl mx-auto p-6" aria-busy="true">
+        <header className="mb-6" aria-hidden="true">
           <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="space-y-6">
+        </header>
+        <section className="space-y-6" aria-label="User details loading">
           <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   if (isPaused && !data) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Button
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          <ArrowLeft className="size-4 mr-2" />
-          Back
-        </Button>
-        <div className="flex flex-col items-center justify-center p-6 gap-4">
+      <main className="max-w-4xl mx-auto p-6">
+        <nav aria-label="Back">
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="mb-6"
+          >
+            <ArrowLeft className="size-4 mr-2" />
+            Back
+          </Button>
+        </nav>
+        <section className="flex flex-col items-center justify-center p-6 gap-4" aria-label="Offline">
           <p className="text-muted-foreground">We're offline and have no data to show :(</p>
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   if (error && !data) {
     toast.error("Failed to load user")
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Button
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          <ArrowLeft className="size-4 mr-2" />
-          Back
-        </Button>
-        <div className="flex flex-col items-center justify-center p-6 gap-4">
+      <main className="max-w-4xl mx-auto p-6">
+        <nav aria-label="Back">
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="mb-6"
+          >
+            <ArrowLeft className="size-4 mr-2" />
+            Back
+          </Button>
+        </nav>
+        <section className="flex flex-col items-center justify-center p-6 gap-4" aria-label="Error loading user">
           <p className="text-destructive">Failed to load user</p>
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   if (!data) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Button
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          <ArrowLeft className="size-4 mr-2" />
-          Back
-        </Button>
-        <div className="flex items-center justify-center p-6">
+      <main className="max-w-4xl mx-auto p-6">
+        <nav aria-label="Back">
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="mb-6"
+          >
+            <ArrowLeft className="size-4 mr-2" />
+            Back
+          </Button>
+        </nav>
+        <section className="flex items-center justify-center p-6" aria-label="User not found">
           <p className="text-muted-foreground">User not found</p>
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   return (
-    <div className="max-w-4xl w-full mx-auto px-4 py-6 flex flex-col gap-4">
-      <Button
-        variant="ghost"
-        onClick={() => navigate(-1)}
-        className="w-fit -ml-2"
-      >
-        <ArrowLeft className="size-4 mr-2" />
-        Back
-      </Button>
-      <div className="flex flex-col gap-6">
+    <main className="max-w-4xl w-full mx-auto px-4 py-6 flex flex-col gap-4">
+      <nav aria-label="Back">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="w-fit -ml-2"
+        >
+          <ArrowLeft className="size-4 mr-2" />
+          Back
+        </Button>
+      </nav>
+      <section className="flex flex-col gap-6" aria-label="User profile">
         <UserCardHeader user={data} />
         <UserPosts />
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }

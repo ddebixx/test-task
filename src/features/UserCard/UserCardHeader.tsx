@@ -10,8 +10,8 @@ interface UserCardHeaderProps {
 export const UserCardHeader = ({ user }: UserCardHeaderProps) => {
   return (
     <CardHeader>
-      <div className="flex items-center gap-4">
-        <Avatar size="lg">
+      <header className="flex items-center gap-4">
+        <Avatar size="lg" aria-hidden="true">
           <AvatarFallback className="text-lg">
             {getInitials(user.name)}
           </AvatarFallback>
@@ -20,7 +20,7 @@ export const UserCardHeader = ({ user }: UserCardHeaderProps) => {
           <CardTitle className="text-2xl">{user.name}</CardTitle>
           <CardDescription className="text-base">@{user.username}</CardDescription>
         </div>
-      </div>
+      </header>
     </CardHeader>
   )
 }

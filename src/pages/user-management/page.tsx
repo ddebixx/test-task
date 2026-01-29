@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { fetchUsers } from "@/fetchers/fetchUser/fetchUser"
+import { usersQueryKey, usersQueryOptions } from "@/queries/usersQueryOptions"
 import { useCreateUserMutation } from "@/mutations/user/createUserMutation"
 import { useUpdateUserMutation } from "@/mutations/user/updateUserMutation"
 import { useDeleteUserMutation } from "@/mutations/user/deleteUserMutation"
@@ -16,7 +16,7 @@ import { Mail, MapPin, Building2, Plus, Edit, Trash2 } from "lucide-react"
 import type { User } from "@/types/types"
 import type { CreateUser } from "@/types/types"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
-import { usePagination } from "@/hooks/usePagination"
+import { usePaginatedData } from "@/hooks/usePaginatedData"
 
 export default function UserManagement() {
   const queryClient = useQueryClient()
@@ -25,20 +25,9 @@ export default function UserManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
-  const { data: users, isLoading, error } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
-  })
+  const { data: users, isLoading, error } = useQuery(usersQueryOptions())
 
-  const userList = users ?? []
-  const {
-    page,
-    totalPages,
-    paginatedItems: paginatedUsers,
-    goToNextPage,
-    goToPage,
-    goToPreviousPage,
-  } = usePagination<User>({ items: userList })
+  const { paginatedItems: paginatedUsers, paginationProps } = usePaginatedData<User>({ data: users })
 
   const createMutation = useCreateUserMutation()
   const updateMutation = useUpdateUserMutation()
@@ -104,11 +93,11 @@ export default function UserManagement() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-6 flex justify-between items-center">
+      <main className="max-w-4xl mx-auto p-6" aria-busy="true">
+        <header className="mb-6 flex justify-between items-center" aria-hidden="true">
           <Skeleton className="h-9 w-32" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        </header>
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-label="Users list loading">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
               <CardHeader>
@@ -128,41 +117,42 @@ export default function UserManagement() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex flex-col items-center justify-center gap-4">
+      <main className="max-w-4xl mx-auto p-6">
+        <section className="flex flex-col items-center justify-center gap-4" aria-label="Error loading users">
           <p className="text-destructive">Failed to load users</p>
-          <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: ["users"] })}>
+          <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}>
             Retry
           </Button>
-        </div>
-      </div>
+        </section>
+      </main>
     )
   }
 
   return (
-    <div className="max-w-4xl w-full mx-auto p-6">
-      <div className="mb-6 flex justify-end items-center">
+    <main className="max-w-4xl w-full mx-auto p-6">
+      <header className="mb-6 flex justify-end items-center">
         <Button onClick={handleCreateClick}>
           <Plus className="size-4" />
           Add User
         </Button>
-      </div>
+      </header>
 
       {!users || users.length === 0 ? (
-        <div className="flex items-center justify-center p-6">
+        <section className="flex items-center justify-center p-6" aria-label="No users">
           <p className="text-muted-foreground">No users found</p>
-        </div>
+        </section>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-label="Users list">
           {paginatedUsers.map((user) => (
-            <Card key={user.id} className="hover:shadow-md transition-shadow">
+            <article key={user.id}>
+              <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <Avatar>
@@ -212,17 +202,12 @@ export default function UserManagement() {
                 </div>
               </CardContent>
             </Card>
+            </article>
           ))}
-        </div>
+        </section>
       )}
 
-      <PaginationWrapper
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={goToPage}
-        onNextPage={goToNextPage}
-        onPreviousPage={goToPreviousPage}
-      />
+      <PaginationWrapper {...paginationProps} />
 
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -242,6 +227,6 @@ export default function UserManagement() {
         onConfirm={handleDeleteConfirm}
         isDeleting={deleteMutation.isPending}
       />
-    </div>
+    </main>
   )
 }
