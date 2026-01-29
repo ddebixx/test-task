@@ -59,15 +59,14 @@ The app is a **Progressive Web App (PWA)** that works completely offline:
    - Open DevTools → Network tab
    - Check "Offline" checkbox
    - **Refresh the page** or open a new tab
-   - ✅ The app loads instantly from cache
-   - ✅ You see a yellow banner: "You are offline. Using cached data."
-   - ✅ All previously loaded data is available
+   - The app loads instantly from cache
+   - All previously loaded data is available
 
 3. **Mutations while offline**:
    - Try to create/edit/delete a user while offline
    - Mutations are **queued automatically**
    - Go back online
-   - ✅ Queued mutations execute automatically
+   - Queued mutations execute automatically
 
 4. **Install as PWA** (optional):
    - Chrome/Edge: Look for install icon in address bar
