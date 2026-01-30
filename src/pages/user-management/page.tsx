@@ -1,11 +1,9 @@
-import { useState } from "react"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { usersQueryOptions } from "@/queries/usersQueryOptions"
-import { useCreateUserMutation } from "@/mutations/user/createUserMutation"
-import { useUpdateUserMutation } from "@/mutations/user/updateUserMutation"
-import { useDeleteUserMutation } from "@/mutations/user/deleteUserMutation"
 import { UserForm } from "@/features/UserManagement/UserForm"
 import { DeleteUserDialog } from "@/features/UserManagement/DeleteUserDialog"
+import { useDeleteUserDialog } from "@/features/UserManagement/useDeleteUserDialog"
+import { useUserFormDialog } from "@/features/UserManagement/useUserFormDialog"
 import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 import { USER_MANAGEMENT } from "@/consts/messages"
 import { Button } from "@/components/ui/Button/Button"
@@ -14,77 +12,32 @@ import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
 import { Dialog, DialogContent } from "@/components/ui/Dialog/Dialog"
 import { getInitials } from "@/helpers/helpers"
 import { Mail, MapPin, Building2, Plus, Edit, Trash2 } from "lucide-react"
-import type { UpdateUser, User } from "@/types/types"
-import type { CreateUser } from "@/types/types"
+import type { User } from "@/types/types"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePaginatedData } from "@/hooks/usePaginatedData"
 
 export default function UserManagement() {
-  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<User | null>(null)
-
   const { data: users } = useSuspenseQuery(usersQueryOptions())
   const { paginatedItems: paginatedUsers, paginationProps } = usePaginatedData<User>({ data: users })
 
-  const handleCreateClick = () => {
-    setEditingUser(null)
-    setIsFormDialogOpen(true)
-  }
+  const {
+    isOpen: isDeleteDialogOpen,
+    userToDelete,
+    openDialog: openDeleteDialog,
+    handleOpenChange: handleDeleteDialogChange,
+    confirmDelete: handleDeleteConfirm,
+    isDeleting,
+  } = useDeleteUserDialog()
 
-  const handleEditClick = (user: User) => {
-    setEditingUser(user)
-    setIsFormDialogOpen(true)
-  }
-
-  const handleDeleteClick = (user: User) => {
-    setUserToDelete(user)
-    setIsDeleteDialogOpen(true)
-  }
-
-  const handleDeleteConfirm = () => {
-    if (userToDelete) {
-      useDeleteUserMutation().mutate(userToDelete.id, {
-        onSuccess: () => {
-          setIsDeleteDialogOpen(false)
-          setUserToDelete(null)
-        },
-      })
-    }
-  }
-
-  const handleDeleteDialogChange = (open: boolean) => {
-    setIsDeleteDialogOpen(open)
-    if (!open) {
-      setUserToDelete(null)
-    }
-  }
-
-  const handleFormSubmit = (data: UpdateUser | CreateUser) => {
-    if (editingUser) {
-      useUpdateUserMutation().mutate(
-        { userId: editingUser.id, data: data as UpdateUser },
-        {
-          onSuccess: () => {
-            setIsFormDialogOpen(false)
-            setEditingUser(null)
-          },
-        }
-      )
-    } else {
-      useCreateUserMutation().mutate(data as CreateUser, {
-        onSuccess: () => {
-          setIsFormDialogOpen(false)
-        },
-      })
-    }
-  }
-
-  const handleFormCancel = () => {
-    setIsFormDialogOpen(false)
-    setEditingUser(null)
-  }
+  const {
+    isOpen: isFormDialogOpen,
+    editingUser,
+    openCreate: handleCreateClick,
+    openEdit: handleEditClick,
+    closeForm: handleFormCancel,
+    submitForm: handleFormSubmit,
+    isPending: isFormPending,
+  } = useUserFormDialog()
 
   return (
     <main className="max-w-4xl w-full mx-auto p-6">
@@ -140,9 +93,9 @@ export default function UserManagement() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDeleteClick(user)}
+                      onClick={() => openDeleteDialog(user)}
                       className="max-[480px]:w-full"
-                      disabled={useDeleteUserMutation().isPending}
+                      disabled={isDeleting}
                     >
                       <Trash2 className="size-4" />
                       Delete
@@ -158,13 +111,13 @@ export default function UserManagement() {
 
       <PaginationWrapper {...paginationProps} />
 
-      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+      <Dialog open={isFormDialogOpen} onOpenChange={(open) => !open && handleFormCancel()}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <UserForm
-            user={editingUser || undefined}
-            onSubmit={async (data) => await handleFormSubmit(data)}
+            user={editingUser ?? undefined}
+            onSubmit={async (data) => handleFormSubmit(data)}
             onCancel={handleFormCancel}
-            isLoading={useCreateUserMutation().isPending || useUpdateUserMutation().isPending}
+            isLoading={isFormPending}
           />
         </DialogContent>
       </Dialog>
@@ -172,9 +125,9 @@ export default function UserManagement() {
       <DeleteUserDialog
         open={isDeleteDialogOpen}
         onOpenChange={handleDeleteDialogChange}
-        userName={userToDelete?.name || null}
+        userName={userToDelete?.name ?? null}
         onConfirm={handleDeleteConfirm}
-        isDeleting={useDeleteUserMutation().isPending}
+        isDeleting={isDeleting}
       />
     </main>
   )
