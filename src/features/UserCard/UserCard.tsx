@@ -32,7 +32,6 @@ export const UserCard = ({
     <article className="space-y-6" aria-label={`User profile: ${user.name}`}>
       <UserCardHeader user={user} />
 
-
     {/* User card is separated into multiple components for better readability and reusability
     This will allow us to reuse individaual parts of it in other components if needed
     Without any need to rewrite the entire component */}

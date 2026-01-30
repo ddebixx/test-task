@@ -1,3 +1,9 @@
+export const USER_PAGE = {
+  ERROR: "Failed to load user",
+  EMPTY: "User not found",
+  RETRY: "Retry",
+} as const
+
 export const USER_MANAGEMENT = {
   ERROR: "Failed to load users",
   EMPTY: "No users found",
