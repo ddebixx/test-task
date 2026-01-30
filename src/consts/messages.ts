@@ -1,4 +1,8 @@
-export const OFFLINE_MESSAGE = "We're offline and have no data to show :("
+export const USER_MANAGEMENT = {
+  ERROR: "Failed to load users",
+  EMPTY: "No users found",
+  RETRY: "Retry",
+} as const
 
 export const USERS_LIST = {
   ERROR: "Failed to load users",

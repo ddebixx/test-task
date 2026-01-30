@@ -6,14 +6,17 @@ import { useUpdateUserMutation } from "@/mutations/user/updateUserMutation"
 import { useDeleteUserMutation } from "@/mutations/user/deleteUserMutation"
 import { UserForm } from "@/features/UserManagement/UserForm"
 import { DeleteUserDialog } from "@/features/UserManagement/DeleteUserDialog"
+import { UserManagementSkeleton } from "@/features/UserManagement/UserManagementSkeleton"
+import { QueryErrorState } from "@/components/QueryStates/QueryErrorState"
+import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
+import { USER_MANAGEMENT } from "@/consts/messages"
 import { Button } from "@/components/ui/Button/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
 import { Dialog, DialogContent } from "@/components/ui/Dialog/Dialog"
-import { Skeleton } from "@/components/ui/Skeleton/Skeleton"
 import { getInitials } from "@/helpers/helpers"
 import { Mail, MapPin, Building2, Plus, Edit, Trash2 } from "lucide-react"
-import type { User } from "@/types/types"
+import type { UpdateUser, User } from "@/types/types"
 import type { CreateUser } from "@/types/types"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePaginatedData } from "@/hooks/usePaginatedData"
@@ -28,10 +31,6 @@ export default function UserManagement() {
   const { data: users, isLoading, error } = useQuery(usersQueryOptions())
 
   const { paginatedItems: paginatedUsers, paginationProps } = usePaginatedData<User>({ data: users })
-
-  const createMutation = useCreateUserMutation()
-  const updateMutation = useUpdateUserMutation()
-  const deleteMutation = useDeleteUserMutation()
 
   const handleCreateClick = () => {
     setEditingUser(null)
@@ -50,7 +49,7 @@ export default function UserManagement() {
 
   const handleDeleteConfirm = () => {
     if (userToDelete) {
-      deleteMutation.mutate(userToDelete.id, {
+      useDeleteUserMutation().mutate(userToDelete.id, {
         onSuccess: () => {
           setIsDeleteDialogOpen(false)
           setUserToDelete(null)
@@ -66,10 +65,10 @@ export default function UserManagement() {
     }
   }
 
-  const handleFormSubmit = (data: CreateUser) => {
+  const handleFormSubmit = (data: UpdateUser | CreateUser) => {
     if (editingUser) {
-      updateMutation.mutate(
-        { userId: editingUser.id, data },
+      useUpdateUserMutation().mutate(
+        { userId: editingUser.id, data: data as UpdateUser },
         {
           onSuccess: () => {
             setIsFormDialogOpen(false)
@@ -78,7 +77,7 @@ export default function UserManagement() {
         }
       )
     } else {
-      createMutation.mutate(data, {
+      useCreateUserMutation().mutate(data as CreateUser, {
         onSuccess: () => {
           setIsFormDialogOpen(false)
         },
@@ -92,45 +91,18 @@ export default function UserManagement() {
   }
 
   if (isLoading) {
-    return (
-      <main className="max-w-4xl mx-auto p-6" aria-busy="true">
-        <header className="mb-6 flex justify-between items-center" aria-hidden="true">
-          <Skeleton className="h-9 w-32" />
-        </header>
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-label="Users list loading">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  <Skeleton className="size-12 rounded-full" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-      </main>
-    )
+    return <UserManagementSkeleton />
   }
 
   if (error) {
     return (
       <main className="max-w-4xl mx-auto p-6">
-        <section className="flex flex-col items-center justify-center gap-4" aria-label="Error loading users">
-          <p className="text-destructive">Failed to load users</p>
-          <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}>
-            Retry
-          </Button>
-        </section>
+        <QueryErrorState
+          message={USER_MANAGEMENT.ERROR}
+          retryLabel={USER_MANAGEMENT.RETRY}
+          ariaLabel="Error loading users"
+          onRetry={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}
+        />
       </main>
     )
   }
@@ -145,9 +117,7 @@ export default function UserManagement() {
       </header>
 
       {!users || users.length === 0 ? (
-        <section className="flex items-center justify-center p-6" aria-label="No users">
-          <p className="text-muted-foreground">No users found</p>
-        </section>
+        <QueryEmptyState message={USER_MANAGEMENT.EMPTY} ariaLabel="No users" />
       ) : (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-label="Users list">
           {paginatedUsers.map((user) => (
@@ -193,7 +163,7 @@ export default function UserManagement() {
                       size="sm"
                       onClick={() => handleDeleteClick(user)}
                       className="max-[480px]:w-full"
-                      disabled={deleteMutation.isPending}
+                      disabled={useDeleteUserMutation().isPending}
                     >
                       <Trash2 className="size-4" />
                       Delete
@@ -215,7 +185,7 @@ export default function UserManagement() {
             user={editingUser || undefined}
             onSubmit={async (data) => await handleFormSubmit(data)}
             onCancel={handleFormCancel}
-            isLoading={createMutation.isPending || updateMutation.isPending}
+            isLoading={useCreateUserMutation().isPending || useUpdateUserMutation().isPending}
           />
         </DialogContent>
       </Dialog>
@@ -225,7 +195,7 @@ export default function UserManagement() {
         onOpenChange={handleDeleteDialogChange}
         userName={userToDelete?.name || null}
         onConfirm={handleDeleteConfirm}
-        isDeleting={deleteMutation.isPending}
+        isDeleting={useDeleteUserMutation().isPending}
       />
     </main>
   )

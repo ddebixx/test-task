@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUpdateUserMutation } from "./updateUserMutation";
 import { updateUser } from "@/fetchers/fetchUser/updateUser";
 import { usersQueryKey } from "@/queries/usersQueryOptions";
-import type { CreateUser, User } from "@/types/types";
+import type { UpdateUser, User } from "@/types/types";
 
 vi.mock("sonner", () => ({
   toast: {
@@ -64,7 +64,7 @@ describe("useUpdateUserMutation", () => {
       },
     };
 
-    const updateUserData: CreateUser = {
+    const updateUserData: UpdateUser = {
       name: "Jane Doe",
       username: "johndoe",
       email: "jane@example.com",
@@ -103,7 +103,7 @@ describe("useUpdateUserMutation", () => {
 
   it("should show error toast when mutation fails", async () => {
     const { toast } = await import("sonner");
-    const updateUserData: CreateUser = {
+    const updateUserData: UpdateUser = {
       name: "Jane Doe",
       username: "johndoe",
       email: "jane@example.com",
@@ -167,7 +167,7 @@ describe("useUpdateUserMutation", () => {
       },
     };
 
-    const updateUserData: CreateUser = {
+    const updateUserData: UpdateUser = {
       name: "Jane Doe",
       username: "johndoe",
       email: "jane@example.com",

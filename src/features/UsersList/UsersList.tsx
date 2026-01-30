@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Mail, MapPin, Building2 } from "lucide-react"
-import { Button } from "@/components/ui/Button/Button"
 import { UserCard } from "@/features/UserCard/UserCard"
 import { UserListSkeleton } from "@/features/UsersList/UserListSkeleton"
 import type { User } from "@/types/types"
@@ -14,7 +13,9 @@ import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrap
 import { usePaginatedData } from "@/hooks/usePaginatedData"
 import { useQueryFetchState } from "@/hooks/useQueryFetchState"
 import { usersQueryKey, usersQueryOptions } from "@/queries/usersQueryOptions"
-import { OFFLINE_MESSAGE, USERS_LIST } from "@/consts/messages"
+import { USERS_LIST } from "@/consts/messages"
+import { QueryErrorState } from "@/components/QueryStates/QueryErrorState"
+import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 
 export const UsersList = () => {
   const queryClient = useQueryClient()
@@ -22,7 +23,7 @@ export const UsersList = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const { data, isLoading, error, isPaused } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...usersQueryOptions(),
     enabled: !!cachedData || shouldFetch,
   })
@@ -40,14 +41,6 @@ export const UsersList = () => {
     setSelectedUser(null)
   }
 
-  if (isPaused && !data) {
-    return (
-      <section className="flex flex-col items-center justify-center p-6 gap-4" aria-label="Offline">
-        <p className="text-muted-foreground">{OFFLINE_MESSAGE}</p>
-      </section>
-    )
-  }
-
   if (isLoading && !cachedData) {
     return <UserListSkeleton />
   }
@@ -55,21 +48,17 @@ export const UsersList = () => {
   if (error && !data) {
     toast.error(USERS_LIST.ERROR)
     return (
-      <section className="flex flex-col items-center justify-center p-6 gap-4" aria-label="Error loading users">
-        <p className="text-destructive">{USERS_LIST.ERROR}</p>
-        <Button variant="outline" onClick={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}>
-          {USERS_LIST.RETRY}
-        </Button>
-      </section>
+      <QueryErrorState
+        message={USERS_LIST.ERROR}
+        retryLabel={USERS_LIST.RETRY}
+        ariaLabel="Error loading users"
+        onRetry={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}
+      />
     )
   }
 
   if (!data || data.length === 0) {
-    return (
-      <section className="flex items-center justify-center p-6" aria-label="No users">
-        <p className="text-muted-foreground">{USERS_LIST.EMPTY}</p>
-      </section>
-    )
+    return <QueryEmptyState message={USERS_LIST.EMPTY} ariaLabel="No users" />
   }
 
   return (

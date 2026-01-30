@@ -7,7 +7,7 @@ import { CommentsSkeleton } from "./CommentsSkeleton"
 import type { Comment } from "@/types/types"
 import { Button } from "@/components/ui/Button/Button"
 import { MessageSquare, ChevronDown, ChevronUp } from "lucide-react"
-import { OFFLINE_MESSAGE, COMMENTS } from "@/consts/messages"
+import { COMMENTS } from "@/consts/messages"
 
 interface UserCommentsProps {
   postId: number
@@ -18,7 +18,7 @@ export const UserComments = ({ postId }: UserCommentsProps) => {
   const queryClient = useQueryClient()
   const { cachedData, shouldFetch } = useQueryFetchState<Comment[]>(commentsQueryKey(postId))
 
-  const { data, isLoading, error, isPaused } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...commentsQueryOptions(postId),
     enabled: isExpanded && (!!cachedData || shouldFetch),
   })
@@ -55,12 +55,6 @@ export const UserComments = ({ postId }: UserCommentsProps) => {
 
       {isExpanded && (
         <div className="mt-3 space-y-2 pt-3 border-t" role="region" aria-label="Comments list">
-          {isPaused && !data && (
-            <div className="flex flex-col items-center justify-center p-3 gap-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">{OFFLINE_MESSAGE}</p>
-            </div>
-          )}
-
           {isLoading && !cachedData && (
             <div className="space-y-2">
               <CommentsSkeleton />

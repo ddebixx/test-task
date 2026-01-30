@@ -45,11 +45,11 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>
 
-export const createUserSchema = z.object({
+const userPayloadSchema = z.object({
   name: z.string().min(1, "Name is required"),
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Invalid email address"),
-    address: z.object({
+  address: z.object({
     street: z.string(),
     suite: z.string(),
     city: z.string(),
@@ -68,29 +68,8 @@ export const createUserSchema = z.object({
   }),
 })
 
+export const createUserSchema = userPayloadSchema
 export type CreateUser = z.infer<typeof createUserSchema>
 
-export const updateUserSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  username: z.string().min(1, "Username is required").optional(),
-  email: z.string().email("Invalid email address").optional(),
-  address: z.object({
-    street: z.string(),
-    suite: z.string(),
-    city: z.string(),
-    zipcode: z.string(),
-    geo: z.object({
-      lat: z.string(),
-      lng: z.string(),
-    }),
-  }).optional(),
-  phone: z.string().min(1, "Phone is required").optional(),
-  website: z.string().min(1, "Website is required").optional(),
-  company: z.object({
-    name: z.string(),
-    catchPhrase: z.string(),
-    bs: z.string(),
-  }).optional(),
-})
-
+export const updateUserSchema = userPayloadSchema.partial()
 export type UpdateUser = z.infer<typeof updateUserSchema>
