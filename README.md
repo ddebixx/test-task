@@ -46,35 +46,6 @@ npm run knip       # unused files/exports
 
 ---
 
-## Testing Offline Functionality
-
-The app is a **Progressive Web App (PWA)** that works completely offline:
-
-1. **First visit (online)**:
-   - Open the app in your browser
-   - Browse users, view details, posts, and comments
-   - The Service Worker caches all assets and API responses
-
-2. **Test offline mode**:
-   - Open DevTools → Network tab
-   - Check "Offline" checkbox
-   - **Refresh the page** or open a new tab
-   - The app loads instantly from cache
-   - All previously loaded data is available
-
-3. **Mutations while offline**:
-   - Try to create/edit/delete a user while offline
-   - Mutations are **queued automatically**
-   - Go back online
-   - Queued mutations execute automatically
-
-4. **Install as PWA** (optional):
-   - Chrome/Edge: Look for install icon in address bar
-   - The app runs as a standalone application
-   - Opens in its own window without browser chrome
-
----
-
 ## Why it was implemented this way
 
 - **Type safety & validation**
@@ -88,14 +59,13 @@ The app is a **Progressive Web App (PWA)** that works completely offline:
   - `PersistQueryClientProvider` + `createSyncStoragePersister` store queries in `localStorage`, so:
     - data is available offline when previously loaded,
     - mutations are paused while offline and resumed automatically.
-  - **Offline indicator** shows a banner when you're working with cached data.
   - **NetworkFirst** strategy for API calls ensures fresh data when online, cached data when offline.
   - Queries use `onlineManager` and `useIsRestoring` to show clear loading, error, and offline‑no‑data states.
 
 - **Clear separation of concerns**
   - Feature modules in `src/features/**` (`UsersList`, `UserManagement`, `UserPosts`, `UserCard`).
   - Fetchers (`src/fetchers/**`) and mutations (`src/mutations/**`) keep data logic out of components.
-  - `usePagination` in `src/hooks/usePagination.ts` centralizes pagination for users and posts.
+  - Hooks in `src/hooks/usePagination.ts` centralizes reusable functions in the projects.
   - Shared UI primitives live in `src/components/ui/**`.
 
 - **Consistent, accessible UI**
