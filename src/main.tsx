@@ -5,8 +5,7 @@ import App from './App.tsx'
 import { Toaster } from 'sonner'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { ThemeProvider } from 'next-themes'
-import { queryClient } from './lib/utils.ts'
-import { asyncStoragePersister } from './lib/utils.ts'
+import { queryClient, asyncStoragePersister } from "./lib/queryClient"
 
 
 createRoot(document.getElementById('root')!).render(

@@ -1,33 +1,22 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { Mail, MapPin, Building2 } from "lucide-react"
 import { UserCard } from "@/features/UserCard/UserCard"
-import { UserListSkeleton } from "@/features/UsersList/UserListSkeleton"
 import type { User } from "@/types/types"
 import { getInitials } from "@/helpers/helpers"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/Dialog/Dialog"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePaginatedData } from "@/hooks/usePaginatedData"
-import { useQueryFetchState } from "@/hooks/useQueryFetchState"
-import { usersQueryKey, usersQueryOptions } from "@/queries/usersQueryOptions"
+import { usersQueryOptions } from "@/queries/usersQueryOptions"
 import { USERS_LIST } from "@/consts/messages"
-import { QueryErrorState } from "@/components/QueryStates/QueryErrorState"
 import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 
 export const UsersList = () => {
-  const queryClient = useQueryClient()
-  const { cachedData, shouldFetch } = useQueryFetchState<User[]>(usersQueryKey)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  const { data, isLoading, error } = useQuery({
-    ...usersQueryOptions(),
-    enabled: !!cachedData || shouldFetch,
-  })
-
+  const { data } = useSuspenseQuery(usersQueryOptions())
   const { paginatedItems: paginatedUsers, paginationProps } = usePaginatedData<User>({ data })
 
   const handleUserClick = (user: User) => {
@@ -35,26 +24,9 @@ export const UsersList = () => {
     setIsDialogOpen(true)
   }
 
-
   const handleDialogClose = () => {
     setIsDialogOpen(false)
     setSelectedUser(null)
-  }
-
-  if (isLoading && !cachedData) {
-    return <UserListSkeleton />
-  }
-
-  if (error && !data) {
-    toast.error(USERS_LIST.ERROR)
-    return (
-      <QueryErrorState
-        message={USERS_LIST.ERROR}
-        retryLabel={USERS_LIST.RETRY}
-        ariaLabel="Error loading users"
-        onRetry={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}
-      />
-    )
   }
 
   if (!data || data.length === 0) {

@@ -12,9 +12,6 @@ export const useUpdateUserMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersQueryKey })
       toast.success("User updated successfully")
-    },
-    onError: (error) => {
-      toast.error(`Failed to update user: ${error instanceof Error ? error.message : "Unknown error"}`)
-    },
+    }
   })
 }

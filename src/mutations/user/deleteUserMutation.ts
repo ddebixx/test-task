@@ -11,9 +11,6 @@ export const useDeleteUserMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersQueryKey })
       toast.success("User deleted successfully")
-    },
-    onError: (error) => {
-      toast.error(`Failed to delete user: ${error instanceof Error ? error.message : "Unknown error"}`)
-    },
+    }
   })
 }

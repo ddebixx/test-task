@@ -1,13 +1,11 @@
 import { useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { usersQueryKey, usersQueryOptions } from "@/queries/usersQueryOptions"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { usersQueryOptions } from "@/queries/usersQueryOptions"
 import { useCreateUserMutation } from "@/mutations/user/createUserMutation"
 import { useUpdateUserMutation } from "@/mutations/user/updateUserMutation"
 import { useDeleteUserMutation } from "@/mutations/user/deleteUserMutation"
 import { UserForm } from "@/features/UserManagement/UserForm"
 import { DeleteUserDialog } from "@/features/UserManagement/DeleteUserDialog"
-import { UserManagementSkeleton } from "@/features/UserManagement/UserManagementSkeleton"
-import { QueryErrorState } from "@/components/QueryStates/QueryErrorState"
 import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 import { USER_MANAGEMENT } from "@/consts/messages"
 import { Button } from "@/components/ui/Button/Button"
@@ -22,14 +20,12 @@ import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrap
 import { usePaginatedData } from "@/hooks/usePaginatedData"
 
 export default function UserManagement() {
-  const queryClient = useQueryClient()
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
-  const { data: users, isLoading, error } = useQuery(usersQueryOptions())
-
+  const { data: users } = useSuspenseQuery(usersQueryOptions())
   const { paginatedItems: paginatedUsers, paginationProps } = usePaginatedData<User>({ data: users })
 
   const handleCreateClick = () => {
@@ -88,23 +84,6 @@ export default function UserManagement() {
   const handleFormCancel = () => {
     setIsFormDialogOpen(false)
     setEditingUser(null)
-  }
-
-  if (isLoading) {
-    return <UserManagementSkeleton />
-  }
-
-  if (error) {
-    return (
-      <main className="max-w-4xl mx-auto p-6">
-        <QueryErrorState
-          message={USER_MANAGEMENT.ERROR}
-          retryLabel={USER_MANAGEMENT.RETRY}
-          ariaLabel="Error loading users"
-          onRetry={() => queryClient.refetchQueries({ queryKey: usersQueryKey })}
-        />
-      </main>
-    )
   }
 
   return (

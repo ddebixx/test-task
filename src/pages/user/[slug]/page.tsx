@@ -1,49 +1,24 @@
+import { Suspense } from "react"
 import { useParams } from "react-router-dom"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { userQueryKey, userQueryOptions } from "@/queries/userQueryOptions"
-import { useQueryFetchState } from "@/hooks/useQueryFetchState"
-import { QueryErrorState } from "@/components/QueryStates/QueryErrorState"
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query"
+import { userQueryOptions } from "@/queries/userQueryOptions"
+import { userPostsQueryKey } from "@/queries/userPostsQueryOptions"
 import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 import { BackNav } from "@/components/BackNav/BackNav"
-import { UserPageSkeleton } from "@/features/UserCard/UserPageSkeleton"
-import { USER_PAGE } from "@/consts/messages"
-import { toast } from "sonner"
 import { UserCardHeader } from "@/features/UserCard/UserCardHeader"
 import { UserPosts } from "@/features/UserPosts/UserPosts"
-import type { User } from "@/types/types"
-
-// I decided to use a separate page for the user details, posts and comments
-// so it will be easier to manage the data and keep UI more organized
+import { PostListSkeleton } from "@/features/UserPosts/PostListSkeleton"
+import { USER_PAGE } from "@/consts/messages"
+import { QueryErrorBoundary } from "@/components/QueryErrorBoundary/QueryErrorBoundary"
+import { POSTS } from "@/consts/messages"
 
 export default function UserPage() {
   const { slug } = useParams<{ slug: string }>()
   const queryClient = useQueryClient()
-  const { cachedData, shouldFetch } = useQueryFetchState<User>(userQueryKey(slug!))
-
-  const { data, isLoading, error } = useQuery({
-    ...userQueryOptions(slug!),
-    enabled: !!slug && (!!cachedData || shouldFetch),
-    initialData: cachedData,
-  })
-
-  if (isLoading) {
-    return <UserPageSkeleton />
+  if (!slug) {
+    return null
   }
-
-  if (error && !data) {
-    toast.error(USER_PAGE.ERROR)
-    return (
-      <main className="max-w-4xl mx-auto p-6">
-        <BackNav variant="outline" className="mb-6" />
-        <QueryErrorState
-          message={USER_PAGE.ERROR}
-          retryLabel={USER_PAGE.RETRY}
-          ariaLabel="Error loading user"
-          onRetry={() => queryClient.refetchQueries({ queryKey: userQueryKey(slug!) })}
-        />
-      </main>
-    )
-  }
+  const { data } = useSuspenseQuery(userQueryOptions(slug))
 
   if (!data) {
     return (
@@ -59,7 +34,16 @@ export default function UserPage() {
       <BackNav className="-ml-2" />
       <section className="flex flex-col gap-6" aria-label="User profile">
         <UserCardHeader user={data} />
-        <UserPosts />
+        <QueryErrorBoundary
+          message={POSTS.ERROR}
+          retryLabel={POSTS.RETRY}
+          ariaLabel="Error loading posts"
+          onRetry={() => queryClient.refetchQueries({ queryKey: userPostsQueryKey(slug) })}
+        >
+          <Suspense fallback={<PostListSkeleton />}>
+            <UserPosts />
+          </Suspense>
+        </QueryErrorBoundary>
       </section>
     </main>
   )

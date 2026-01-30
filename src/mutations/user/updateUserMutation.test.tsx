@@ -1,38 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, MutationCache } from "@tanstack/react-query";
 import { useUpdateUserMutation } from "./updateUserMutation";
 import { updateUser } from "@/fetchers/fetchUser/updateUser";
 import { usersQueryKey } from "@/queries/usersQueryOptions";
 import type { UpdateUser, User } from "@/types/types";
 
-vi.mock("sonner", () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+const mockToast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
+vi.mock("sonner", () => ({ toast: mockToast }));
 
 vi.mock("@/fetchers/fetchUser/updateUser", () => ({
   updateUser: vi.fn(),
 }));
 
 describe("useUpdateUserMutation", () => {
-  let queryClient: QueryClient;
+  let queryClient: QueryClient
 
   beforeEach(() => {
     queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
+      mutationCache: new MutationCache({
+        onError: (error) => {
+          mockToast.error(error instanceof Error ? error.message : "Something went wrong")
         },
-        mutations: {
-          retry: false,
-        },
-      },
-    });
-    vi.clearAllMocks();
-  });
+      }),
+    })
+    vi.clearAllMocks()
+  })
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -137,9 +130,7 @@ describe("useUpdateUserMutation", () => {
       expect(result.current.isError).toBe(true);
     });
 
-    expect(toast.error).toHaveBeenCalledWith(
-      "Failed to update user: Failed to update user"
-    );
+    expect(toast.error).toHaveBeenCalledWith("Failed to update user");
   });
 
   it("should invalidate users query on success", async () => {
