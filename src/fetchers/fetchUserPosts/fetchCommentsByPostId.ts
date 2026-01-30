@@ -11,11 +11,12 @@ export const fetchCommentsByPostId = async (postId: number): Promise<Comment[]> 
 
   const data = await response.json()
 
-  try {
-    return commentSchema.array().parse(data)
-  } catch (error) {
-    throw new Error(
-      `Invalid comment data format: ${error instanceof Error ? error.message : String(error)}`
-    )
+  const result = commentSchema.array().safeParse(data)
+
+  if (!result.success) {
+    throw new Error(`Invalid comment data format: ${result.error.message}`)
+  } else {
+    return result.data
   }
 }
+

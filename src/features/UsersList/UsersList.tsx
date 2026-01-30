@@ -1,11 +1,10 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
+import { Avatar } from "@/components/ui/Avatar/Avatar"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Mail, MapPin, Building2 } from "lucide-react"
 import { UserCard } from "@/features/UserCard/UserCard"
 import type { User } from "@/types/types"
-import { getInitials } from "@/helpers/helpers"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/Dialog/Dialog"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePaginatedData } from "@/hooks/usePaginatedData"
@@ -44,9 +43,7 @@ export const UsersList = () => {
             >
               <CardHeader>
                 <div className="flex items-center gap-4">
-                <Avatar>
-                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                </Avatar>
+                <Avatar name={user.name} />
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-lg truncate">{user.name}</CardTitle>
                   <CardDescription className="truncate">@{user.username}</CardDescription>

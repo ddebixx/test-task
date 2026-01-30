@@ -8,9 +8,8 @@ import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 import { USER_MANAGEMENT } from "@/consts/messages"
 import { Button } from "@/components/ui/Button/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card/Card"
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
+import { Avatar } from "@/components/ui/Avatar/Avatar"
 import { Dialog, DialogContent } from "@/components/ui/Dialog/Dialog"
-import { getInitials } from "@/helpers/helpers"
 import { Mail, MapPin, Building2, Plus, Edit, Trash2 } from "lucide-react"
 import type { User } from "@/types/types"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
@@ -57,9 +56,7 @@ export default function UserManagement() {
               <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                  </Avatar>
+                  <Avatar name={user.name} />
                   <div className="flex-1 min-w-0 max-w-[160px]">
                     <CardTitle className="text-lg truncate max-w-[140px]">{user.name}</CardTitle>
                     <span className="text-sm text-muted-foreground truncate max-w-[160px]">@{user.username}</span>

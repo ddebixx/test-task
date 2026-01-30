@@ -3,13 +3,21 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
-function Avatar({
-  className,
-  size = "default",
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
+const getInitials = (name: string): string => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+interface AvatarProps extends React.ComponentProps<typeof AvatarPrimitive.Root> {
   size?: "default" | "sm" | "lg"
-}) {
+  name?: string
+}
+
+function Avatar({ className, size = "default", name, children, ...props }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
@@ -19,7 +27,19 @@ function Avatar({
         className
       )}
       {...props}
-    />
+    >
+      {children}
+      {name != null ? (
+        <AvatarPrimitive.Fallback
+          data-slot="avatar-fallback"
+          className={cn(
+            "bg-muted text-muted-foreground flex size-full items-center justify-center rounded-full text-sm group-data-[size=sm]/avatar:text-xs"
+          )}
+        >
+          {getInitials(name)}
+        </AvatarPrimitive.Fallback>
+      ) : null}
+    </AvatarPrimitive.Root>
   )
 }
 

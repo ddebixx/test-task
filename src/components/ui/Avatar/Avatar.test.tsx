@@ -45,6 +45,21 @@ describe("<Avatar />", () => {
       const avatar = screen.getByText("AB").closest('[data-slot="avatar"]');
       expect(avatar).toHaveClass("custom-avatar");
     });
+
+    it("should render fallback with initials when name prop is provided", () => {
+      render(<Avatar name="John Doe" />);
+      expect(screen.getByText("JD")).toBeInTheDocument();
+      expect(screen.getByText("JD").closest('[data-slot="avatar-fallback"]')).toBeInTheDocument();
+    });
+
+    it("should render fallback from name when AvatarImage is provided", () => {
+      render(
+        <Avatar name="Jane Smith">
+          <AvatarImage src="/test.jpg" alt="Jane" />
+        </Avatar>
+      );
+      expect(screen.getByText("JS")).toBeInTheDocument();
+    });
   });
 
   describe("AvatarImage", () => {

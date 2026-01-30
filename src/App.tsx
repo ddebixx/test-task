@@ -11,6 +11,7 @@ import { UserManagementSkeleton } from "./features/UserManagement/UserManagement
 import { UserPageSkeleton } from "./features/UserCard/UserPageSkeleton"
 import { usersQueryKey } from "./queries/usersQueryOptions"
 import { userQueryKey } from "./queries/userQueryOptions"
+import { parseUserSlugParams } from "./utils/userSlugParams"
 import { USER_MANAGEMENT, USER_PAGE, USERS_LIST } from "./consts/messages"
 
 function UsersListRoute() {
@@ -50,7 +51,12 @@ function UserManagementRoute() {
 
 function UserPageRoute() {
   const queryClient = useQueryClient()
-  const { slug } = useParams<{ slug: string }>()
+  const slug = parseUserSlugParams(useParams())
+  
+  if (slug === undefined) {
+    return null
+  }
+  
   return (
     <QueryErrorBoundary
       message={USER_PAGE.ERROR}

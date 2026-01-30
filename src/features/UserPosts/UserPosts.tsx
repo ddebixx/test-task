@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { userPostsQueryOptions } from "@/queries/userPostsQueryOptions"
-import { useParams } from "react-router-dom"
 import type { Post } from "@/types/types"
 import {
   Card,
@@ -16,10 +15,12 @@ import { PostsEmptyState } from "./PostsEmptyState"
 import { PaginationWrapper } from "@/components/PaginationWrapper/PaginationWrapper"
 import { usePaginatedData } from "@/hooks/usePaginatedData"
 
-export const UserPosts = () => {
-  const { slug } = useParams<{ slug: string }>()
-  const userId = slug!
-  const { data } = useSuspenseQuery(userPostsQueryOptions(userId))
+interface UserPostsProps {
+  slug: string
+}
+
+export const UserPosts = ({ slug }: UserPostsProps) => {
+  const { data } = useSuspenseQuery(userPostsQueryOptions(slug))
   const { paginatedItems: paginatedPosts, paginationProps } = usePaginatedData<Post>({ data })
 
   if (!data || data.length === 0) {

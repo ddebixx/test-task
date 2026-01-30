@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query"
 import { userQueryOptions } from "@/queries/userQueryOptions"
 import { userPostsQueryKey } from "@/queries/userPostsQueryOptions"
+import { parseUserSlugParams } from "@/utils/userSlugParams"
 import { QueryEmptyState } from "@/components/QueryStates/QueryEmptyState"
 import { BackNav } from "@/components/BackNav/BackNav"
 import { UserCardHeader } from "@/features/UserCard/UserCardHeader"
@@ -13,9 +14,9 @@ import { QueryErrorBoundary } from "@/components/QueryErrorBoundary/QueryErrorBo
 import { POSTS } from "@/consts/messages"
 
 export default function UserPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const slug = parseUserSlugParams(useParams())
   const queryClient = useQueryClient()
-  if (!slug) {
+  if (slug === undefined) {
     return null
   }
   const { data } = useSuspenseQuery(userQueryOptions(slug))
@@ -41,7 +42,7 @@ export default function UserPage() {
           onRetry={() => queryClient.refetchQueries({ queryKey: userPostsQueryKey(slug) })}
         >
           <Suspense fallback={<PostListSkeleton />}>
-            <UserPosts />
+            <UserPosts slug={slug} />
           </Suspense>
         </QueryErrorBoundary>
       </section>

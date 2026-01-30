@@ -1,6 +1,5 @@
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar/Avatar"
+import { Avatar } from "@/components/ui/Avatar/Avatar"
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/Card/Card"
-import { getInitials } from "@/helpers/helpers"
 import type { User } from "@/types/types"
 
 interface UserCardHeaderProps {
@@ -11,11 +10,7 @@ export const UserCardHeader = ({ user }: UserCardHeaderProps) => {
   return (
     <CardHeader>
       <header className="flex items-center gap-4">
-        <Avatar size="lg" aria-hidden="true">
-          <AvatarFallback className="text-lg">
-            {getInitials(user.name)}
-          </AvatarFallback>
-        </Avatar>
+        <Avatar name={user.name} size="lg" aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <CardTitle className="text-2xl">{user.name}</CardTitle>
           <CardDescription className="text-base">@{user.username}</CardDescription>
